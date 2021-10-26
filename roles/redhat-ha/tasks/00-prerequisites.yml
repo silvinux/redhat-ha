@@ -1,0 +1,17 @@
+- name: Ensuring the basic packages are present
+  ansible.builtin.dnf:
+    state: present
+    name:
+      - git
+      - vim
+      - tar
+      - unzip
+      - bind-utils
+      - firewalld
+
+- name: Ensuring the firewalld service is started and enabled
+  ansible.builtin.service:
+    name: firewalld
+    state: started
+    enabled: yes
+

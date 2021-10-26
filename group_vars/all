@@ -1,0 +1,5 @@
+---
+ipmi_ip: "{{ vault_ipmi_ip }}"
+ipmi_login: "{{ vault_ipmi_login }}"
+ipmi_password: "{{ vault_ipmi_password }}"
+...

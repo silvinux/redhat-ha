@@ -1,0 +1,13 @@
+---
+- name: Deploying a Red Hat High Availability cluster
+  hosts: nodes
+  become: yes
+  become_method: sudo
+  become_user: root
+  remote_user: ansible
+
+  gather_facts: no
+  roles:
+    - role: roles/redhat-ha
+        
+...

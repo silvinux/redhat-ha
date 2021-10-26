@@ -1,0 +1,29 @@
+---
+# tasks file for redhat-ha
+- name: Include Prerequisites Tasks (Optional)
+  include_tasks: 00-prerequisites.yml
+  args:
+    apply:
+      tags: prerequisites
+  tags: prerequisites
+
+- name: Include Tasks to preparing the nodes for Red Hat High Availability cluster
+  include_tasks: 01-preparing.yml
+  args:
+    apply:
+      tags: preparing
+  tags: preparing
+
+- name: Include Tasks to deploy the Red Hat High Availability cluster
+  include_tasks: 02-deploying.yml
+  args:
+    apply:
+      tags: deploying
+  tags: deploying
+
+- name: Include Tasks to configure stonith devices for the Red Hat High Availability cluster
+  include_tasks: 03-stonith.yml
+  args:
+    apply:
+      tags: stonith
+  tags: stonith

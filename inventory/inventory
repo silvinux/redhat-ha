@@ -1,0 +1,16 @@
+[local]
+localhost
+
+[nodes]
+node1.bcnconsulting.com
+node2.bcnconsulting.com
+
+[site1]
+node1-prv.bcnconsulting.com 
+
+[site2]
+node2-prv.bcnconsulting.com 
+
+[nodes-prv:children]
+site1
+site2

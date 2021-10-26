@@ -1,0 +1,33 @@
+---
+- name: Preparing | Ensure required repos are enabled
+  community.general.rhsm_repository:
+    name: "{{ ha_rhsm_repos }}"
+    state: enabled
+
+- name: Ensuring the cluster packages are present
+  ansible.builtin.dnf:
+    state: present
+    name: "{{ ha_packages }}"
+
+- name: Ensuring the required ports are open 
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop: "{{ ha_fw_ports }}"
+
+- include_vars:
+    file: vars/passwords.yml
+
+- name: Ensuring the password for hacluster is configured 
+  user:
+    name: hacluster
+    password: "{{ ha_password | password_hash('sha512') }}"
+
+- name: Ensuring the pcsd service is started and enabled 
+  service:
+    name: pcsd
+    state: started
+    enabled: yes
+...

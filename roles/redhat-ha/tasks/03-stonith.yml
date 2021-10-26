@@ -1,0 +1,53 @@
+---
+- name: Checking if the global STONITH timeout is set
+  command:
+    cmd: pcs property show stonith-timeout
+  register: stonith
+  changed_when: false
+
+- debug:
+    msg: "{{ stonith }}"  
+
+- name: Ensuring the global STONITH timeout is set
+  command:
+    cmd: "pcs property set stonith-timeout={{ stonith_timeout }}s"
+  when: "('stonith-timeout: ' + stonith_timeout|string + 's')
+        not in stonith['stdout']"
+
+- debug:
+    msg: "{{ hostvars[item]['ipmi_ip'] }}"
+    #msg: "{{ 'fence_' + hostvars[item]['inventory_hostname_short'] }}"
+  loop: "{{ groups['nodes-prv'] }}"
+  run_once: true
+    
+- set_fact:
+        ipmi_list: "{{ ipmi_list|default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ip': hostvars[item]['ipmi_ip'], 'node': hostvars[item]['inventory_hostname'], 'login': hostvars[item]['ipmi_login'], 'password': hostvars[item]['ipmi_password'] } ] }}"
+  loop: "{{ groups['nodes-prv'] }}"
+  run_once: true
+
+- debug:
+    msg: "{{ ipmi_list }}"  
+  run_once: true
+  no_log: false
+
+- name: Ensuring the STONITH resources exist
+  include_tasks: create_ipmi.yml
+  loop: "{{ ipmi_list }}"
+  #    - id: fence_nodea
+  #      node: nodea.private.example.com
+  #      ip: 192.168.0.101
+  #      # ipmi_login and ipmi_password are defined in the Vault protected
+  #      # passwords.yml file.
+  #      login: "{{ ipmi_login }}"
+  #      password: "{{ ipmi_password }}"
+  #    - id: fence_nodeb
+  #      node: nodeb.private.example.com
+  #      ip: 192.168.0.102
+  #      login: "{{ ipmi_login }}"
+  #      password: "{{ ipmi_password }}"
+  #    - id: fence_nodec
+  #      node: nodec.private.example.com
+  #      ip: 192.168.0.103
+  #      login: "{{ ipmi_login }}"
+  #      password: "{{ ipmi_password }}"
+...
