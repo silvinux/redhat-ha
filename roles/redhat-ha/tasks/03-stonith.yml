@@ -8,42 +8,67 @@
 - debug:
     msg: "{{ stonith }}"  
 
+- debug:
+    msg: "{{ 'stonith-timeout: ' + stonith_timeout|string + 's' }}"
+
 - name: Ensuring the global STONITH timeout is set
   command:
     cmd: "pcs property set stonith-timeout={{ stonith_timeout }}s"
   when: "('stonith-timeout: ' + stonith_timeout|string + 's')
         not in stonith['stdout']"
-
-- debug:
-    msg: "{{ hostvars[item]['ipmi_ip'] }}"
-    #msg: "{{ 'fence_' + hostvars[item]['inventory_hostname_short'] }}"
-  loop: "{{ groups['nodes-prv'] }}"
-  run_once: true
+#
+#- debug:
+#    msg: "{{ hostvars[item]['ipmi_ip'] }}"
+#    #msg: "{{ 'fence_' + hostvars[item]['inventory_hostname_short'] }}"
+#  loop: "{{ groups['nodes-prv'] }}"
+#  run_once: true
     
 - set_fact:
-        ipmi_list: "{{ ipmi_list|default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ip': hostvars[item]['ipmi_ip'], 'node': hostvars[item]['inventory_hostname'], 'login': hostvars[item]['ipmi_login'], 'password': hostvars[item]['ipmi_password'] } ] }}"
+    fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ip': hostvars[item]['stonith_ipmi_ip'], 'node': hostvars[item]['inventory_hostname'], 'login': hostvars[item]['stonith_ipmi_login'], 'password': hostvars[item]['stonith_ipmi_password'] } ] }}"
   loop: "{{ groups['nodes-prv'] }}"
   run_once: true
+  when: ansible_system_vendor != "Cisco Systems Inc"  
+
+- set_fact:
+    fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': hostvars[item]['stonith_cisco_ucs_ipaddr'], 'port': hostvars[item]['inventory_hostname_short'], 'login': hostvars[item]['stonith_cisco_ucs_login'], 'password': hostvars[item]['stonith_cisco_ucs_passwd'], 'suborg': hostvars[item]['stonith_cisco_ucs_suborg'] } ] }}"
+  loop: "{{ groups['nodes-prv'] }}"
+  run_once: true
+  when: ansible_system_vendor == "Cisco Systems Inc"
 
 - debug:
-    msg: "{{ ipmi_list }}"  
+    msg: "{{ fence_agent_attributes }}"  
   run_once: true
   no_log: false
 
+- set_fact:
+    fence_agent: fence_cisco_ucs
+  when: ansible_system_vendor == "Cisco Systems Inc"
+
+- set_fact:
+    fence_agent: fence_ipmilan
+  when: ansible_system_vendor != "Cisco Systems Inc"  
+
 - name: Ensuring the STONITH resources exist
-  include_tasks: create_ipmi.yml
-  loop: "{{ ipmi_list }}"
-  #    - id: fence_nodea
-  #      node: nodea.private.example.com
-  #      ip: 192.168.0.101
-  #      # ipmi_login and ipmi_password are defined in the Vault protected
-  #      # passwords.yml file.
-  #      login: "{{ ipmi_login }}"
-  #      password: "{{ ipmi_password }}"
-  #    - id: fence_nodeb
-  #      node: nodeb.private.example.com
-  #      ip: 192.168.0.102
-  #      login: "{{ ipmi_login }}"
+  include_tasks: "create_{{ fence_agent }}.yml"
+  loop: "{{ fence_agent_attributes }}"
+  run_once: true
+
+  #- name: Ensuring the STONITH resources exist
+  #  include_tasks: create_fence_ipmilan.yml
+  #loop: "{{ ipmi_list }}"
+  #  when: ansible_system_vendor == "Cisco Systems Inc"
+  #vars:
+  #  - id: fence_nodea
+  #    node: nodea.private.example.com
+  #    ip: 192.168.0.101
+  #    # ipmi_login and ipmi_password are defined in the Vault protected
+  #    # passwords.yml file.
+  #    login: "{{ ipmi_login }}"
+  #    password: "{{ ipmi_password }}"
+  #  - id: fence_nodeb
+  #    node: nodeb.private.example.com
+  #    ip: 192.168.0.102
+  #    login: "{{ ipmi_login }}"
   #      password: "{{ ipmi_password }}"
   #    - id: fence_nodec
   #      node: nodec.private.example.com

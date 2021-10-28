@@ -13,4 +13,18 @@ ha_fw_ports:
 
 ha_cluster_name: cluster-test1     
 
+
+# STONITH
 stonith_timeout: 180
+stonith_monitor_interval: 200
+stonith_failure_timeout: 60
+stonith_migration_threshold: 5
+# Fence IPMILAN
+stonith_ipmi_ip: "{{ vault_ipmi_ip }}"
+stonith_ipmi_login: "{{ vault_ipmi_login }}"
+stonith_ipmi_password: "{{ vault_ipmi_password }}"
+# Fence_CISCO_UCS
+stonith_cisco_ucs_ipaddr: "{{ vault_cisco_ucs_ipaddr }}"
+stonith_cisco_ucs_login: "{{ vault_cisco_ucs_login }}"
+stonith_cisco_ucs_passwd: "{{ vault_cisco_ucs_passwd }}"
+stonith_cisco_ucs_suborg:  "{{ vault_cisco_ucs_suborg }}"

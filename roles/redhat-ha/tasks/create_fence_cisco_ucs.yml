@@ -1,0 +1,46 @@
+---
+# Task file that creates a fence resource using the fence_ipmilan fencing agent.
+
+
+- name: Checking if the STONITH resource exists
+  command:
+    cmd: "pcs stonith config {{ item['id'] }}"
+  register: stonith_resource_exits
+  failed_when: false
+  changed_when: false
+
+- debug:
+    msg: "fence_cisco_ucs"
+
+- name: Ensuring the fence resource exists
+  command:
+    cmd: "pcs stonith create {{ item['id'] }} fence_cisco_ucs
+            pcmk_host_list={{ item['port'] | lower }}
+            ipaddr={{ item['ipaddr'] }}
+            login={{ item['login'] }}
+            passwd={{ item['password'] }}
+            ssl_insecure=1
+            suborg={{ item['suborg'] }}
+            port={{ item['port'] | upper }}
+            power_timeout={{ stonith_timeout }}
+            op monitor interval={{ stonith_monitor_interval }}s
+            meta failure-timeout={{ stonith_failure_timeout }}s migration-threshold={{ stonith_migration_threshold }}"
+  register: fence_resource             
+  changed_when: "'already exists' not in fence_resource['stdout']"
+  when: stonith_resource_exits['rc'] != 0
+
+- name: Ensuring the fence resource is updated
+  command:
+    cmd: "pcs stonith update {{ item['id'] }}
+            pcmk_host_list={{ item['port'] | lower }}
+            ipaddr={{ item['ipaddr'] }}
+            login={{ item['login'] }}
+            passwd={{ item['password'] }}
+            ssl_insecure=1
+            suborg={{ item['suborg'] }}
+            port={{ item['port'] | upper }}
+            power_timeout={{ stonith_timeout }}
+            op monitor interval={{ stonith_monitor_interval }}s
+            meta failure-timeout={{ stonith_failure_timeout }}s migration-threshold={{ stonith_migration_threshold }}"
+  when: stonith_resource_exits['rc'] == 0
+...

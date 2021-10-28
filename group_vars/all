@@ -1,5 +1,9 @@
 ---
-ipmi_ip: "{{ vault_ipmi_ip }}"
-ipmi_login: "{{ vault_ipmi_login }}"
-ipmi_password: "{{ vault_ipmi_password }}"
+stonith_ipmi_ip: "{{ vault_ipmi_ip }}"
+stonith_ipmi_login: "{{ vault_ipmi_login }}"
+stonith_ipmi_password: "{{ vault_ipmi_password }}"
+stonith_cisco_ucs_ipaddr: "{{ vault_cisco_ucs_ipaddr }}"
+stonith_cisco_ucs_login: "{{ vault_cisco_ucs_login }}"
+stonith_cisco_ucs_passwd: "{{ vault_cisco_ucs_passwd }}"
+stonith_cisco_ucs_suborg:  "{{ vault_cisco_ucs_suborg }}"
 ...
