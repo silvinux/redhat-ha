@@ -1,18 +1,28 @@
 ---
 # defaults file for redhat-ha
-ha_rhsm_repos:
+ha_cluster_rhsm_repos:
   - rhel-8-for-x86_64-highavailability-rpms
 
-ha_packages:    
+ha_cluster_packages:    
   - pcs
   # - fence-agents-ipmilan
   - fence-agents-all
 
-ha_fw_ports:
+ha_quorum_cluster_packages:
+  - corosync-qdevice
+
+ha_quorum_dev_system_packages:
+  - pcs
+  - corosync-qnetd        
+
+ha_cluster_fw_ports:
    - high-availability    
 
-ha_cluster_name: cluster-test1     
+ha_cluster_name: cluster-test1
+ha_cluster_password: redhat00
 
+ha_cluster_start_request_timeout: 180
+ha_cluster_start_wait: 180
 
 # STONITH
 stonith_timeout: 180

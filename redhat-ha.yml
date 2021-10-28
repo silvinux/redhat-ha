@@ -1,6 +1,6 @@
 ---
 - name: Deploying a Red Hat High Availability cluster
-  hosts: nodes
+  hosts: nodes:quorum
   become: yes
   become_method: sudo
   become_user: root

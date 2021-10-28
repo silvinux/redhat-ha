@@ -1,16 +1,13 @@
 ---
-- include_vars:
-    file: vars/passwords.yml
-
 - name: Ensuring the cluster nodes are authenticated
   ansible.builtin.command:
-    cmd: "pcs host auth -u hacluster -p {{ ha_password }}
+    cmd: "pcs host auth -u hacluster -p {{ ha_cluster_password }}
           {{ groups['nodes-prv'] | join(' ') }}"
   register: auth_cluster
   changed_when: "'Authorized' in auth_cluster['stdout']"
 
 - name: Checking the cluster configuration
-  stat:
+  ansible.builtin.stat:
     path: /etc/corosync/corosync.conf
   register: cluster_config
 
@@ -29,7 +26,7 @@
 
 - name: Ensuring the cluster is started
   ansible.builtin.command:
-    cmd: pcs cluster start --all --request-timeout=180 --wait=180
+    cmd: "pcs cluster start --all --request-timeout={{ ha_cluster_start_request_timeout }} --wait={{ ha_cluster_start_wait }}"
   register: start_cluster
   changed_when: "'Starting Cluster' in start_cluster['stdout']"
 ...
