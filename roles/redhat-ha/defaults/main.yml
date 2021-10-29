@@ -8,12 +8,6 @@ ha_cluster_packages:
   # - fence-agents-ipmilan
   - fence-agents-all
 
-ha_quorum_cluster_packages:
-  - corosync-qdevice
-
-ha_quorum_dev_system_packages:
-  - pcs
-  - corosync-qnetd        
 
 ha_cluster_fw_ports:
    - high-availability    
@@ -33,8 +27,17 @@ stonith_migration_threshold: 5
 stonith_ipmi_ip: "{{ vault_ipmi_ip }}"
 stonith_ipmi_login: "{{ vault_ipmi_login }}"
 stonith_ipmi_password: "{{ vault_ipmi_password }}"
-# Fence_CISCO_UCS
+# Fence CISCO_UCS
 stonith_cisco_ucs_ipaddr: "{{ vault_cisco_ucs_ipaddr }}"
 stonith_cisco_ucs_login: "{{ vault_cisco_ucs_login }}"
 stonith_cisco_ucs_passwd: "{{ vault_cisco_ucs_passwd }}"
 stonith_cisco_ucs_suborg:  "{{ vault_cisco_ucs_suborg }}"
+# Fence KVM
+stonith_kvm_key_file_path: "/etc/cluster/fence_xvm.key"
+# Quorum
+ha_quorum_cluster_packages:
+  - corosync-qnetd        
+ha_quorum_dev_system_packages:
+  - pcs
+  - corosync-qdevice
+ha_quorum_device_net_algorithm: ffsplit    

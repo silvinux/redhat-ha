@@ -1,40 +1,37 @@
 ---
-#- debug:
-#    msg: "{{ groups['nodes'] + groups['quorum'] }}"
+- name: Preparing | Ensure required repos are enabled
+  community.general.rhsm_repository:
+    name: "{{ ha_cluster_rhsm_repos }}"
+    state: enabled
+  when: groups['nodes'] and groups['quorum'] 
+  #when: ('quorum' in group_names)
+  #when: groups['nodes'] and groups['quorum'] 
+  #when: ('nodes' in group_names) and ('quorum' in group_names)
 
-#- name: Preparing | Ensure required repos are enabled
-#  community.general.rhsm_repository:
-#    name: "{{ ha_cluster_rhsm_repos }}"
-#    state: enabled
-#  when: groups['nodes'] and groups['quorum'] 
-#  #when: ('quorum' in group_names)
-#  #when: groups['nodes'] and groups['quorum'] 
-#  #when: ('nodes' in group_names) and ('quorum' in group_names)
-#
 - block:  
-  #- name: Ensuring the cluster packages are present
-  #  ansible.builtin.dnf:
-  #    name: "{{ ha_quorum_cluster_packages }}"
-  #    state: present
+  - name: Ensuring the cluster packages are present
+    ansible.builtin.dnf:
+      name: "{{ ha_quorum_cluster_packages }}"
+      state: present
 
-  #- name: Ensuring the required ports are open
-  #  ansible.posix.firewalld:
-  #    service: "{{ item }}"
-  #    permanent: yes
-  #    state: enabled
-  #    immediate: yes
-  #  loop: "{{ ha_cluster_fw_ports }}"
-  #
-  #- name: Ensuring the password for hacluster is configured
-  #  user:
-  #    name: hacluster
-  #    password: "{{ ha_cluster_password | password_hash('sha512') }}"
-  #
-  #- name: Ensuring the pcsd service is started and enabled
-  #  service:
-  #    name: pcsd
-  #    state: started
-  #    enabled: yes
+  - name: Ensuring the required ports are open
+    ansible.posix.firewalld:
+      service: "{{ item }}"
+      permanent: yes
+      state: enabled
+      immediate: yes
+    loop: "{{ ha_cluster_fw_ports }}"
+  
+  - name: Ensuring the password for hacluster is configured
+    user:
+      name: hacluster
+      password: "{{ ha_cluster_password | password_hash('sha512') }}"
+  
+  - name: Ensuring the pcsd service is started and enabled
+    service:
+      name: pcsd
+      state: started
+      enabled: yes
   - name: get service facts
     service_facts:
 
@@ -55,13 +52,13 @@
     ansible.builtin.command:
       cmd: "pcs qdevice setup model net --enable --start"
     register: pcs_device_setup_model_net_enable
-    when: pcs_qdevice_status_net_exits['rc'] != 0 and ansible_facts.services['corosync-qnetd.service'].state == 'inactive'
+    when: pcs_qdevice_status_net_exits['rc'] != 0 and ansible_facts.services['corosync-qnetd.service'].state ==  'inactive'
 
   when: ('quorum' in group_names)
 
 - block:
 
-  - name: Ensuring the cluster packages are present
+  - name: Ensuring the cluster packages are present ha_quorum_dev_system_packages
     ansible.builtin.dnf:
       name: "{{ ha_quorum_dev_system_packages }}"
       state: present
@@ -77,11 +74,18 @@
   - debug:
       msg: "host={{ groups['quorum'][0] }}"
 
+  - name: Checking if the STONITH resource exists
+    command:
+      cmd: "pcs quorum device status"
+    register: pcs_quorum_device_status_exists
+    failed_when: false
+    changed_when: false
+
   - name: Ensuring the cluster nodes are authenticated
     ansible.builtin.command:
-      cmd: "pcs quorum device add model net host={{ groups['quorum'][0] }} algorithm=ffsplit"
-      #register: auth_cluster
-      #changed_when: "'Authorized' in auth_cluster['stdout']"
+      cmd: "pcs quorum device add model net host={{ groups['quorum'][0] }} algorithm={{ ha_quorum_device_net_algorithm }}"
+    register: quorum_device_add
+    when: pcs_quorum_device_status_exists['rc'] != 0 
     run_once: true
 
   when: ('nodes' in group_names)
