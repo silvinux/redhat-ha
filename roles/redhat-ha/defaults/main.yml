@@ -1,5 +1,11 @@
 ---
 # defaults file for redhat-ha
+
+# Info to subscribe to RHN
+#redhat_subscription_user: "{{ vault_redhat_subscription_user }}"
+#redhat_subscription_password: "{{ vault_redhat_subscription_password }}"
+#redhat_subscription_pool_id: "{{ vault_redhat_subscription_pool_id }}"
+
 ha_cluster_rhsm_repos:
   - rhel-8-for-x86_64-highavailability-rpms
 

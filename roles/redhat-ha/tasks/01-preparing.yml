@@ -1,4 +1,12 @@
 ---
+- name: Preparing | Register and subscribe to Red Hat Cluster Suite pool
+  community.general.redhat_subscription:
+    state: present
+    username: "{{ redhat_subscription_user }}"
+    password: "{{ redhat_subscription_password }}"
+    pool_ids: "{{ redhat_subscription_pool_id }}"
+  when: redhat_subscription_user is defined and redhat_subscription_password is defined and redhat_subscription_pool_id is defined 
+
 - name: Preparing | Ensure required repos are enabled
   community.general.rhsm_repository:
     name: "{{ ha_cluster_rhsm_repos }}"
