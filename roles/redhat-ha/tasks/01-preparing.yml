@@ -4,12 +4,12 @@
     name: "{{ ha_cluster_rhsm_repos }}"
     state: enabled
 
-- name: Ensuring the cluster packages are present
+- name: Preparing | Ensuring the cluster packages are present
   ansible.builtin.dnf:
     state: present
     name: "{{ ha_cluster_packages }}"
 
-- name: Ensuring the required ports are open 
+- name: Preparing | Ensuring the required ports are open 
   ansible.posix.firewalld:
     service: "{{ item }}"
     permanent: yes
@@ -17,13 +17,13 @@
     immediate: yes
   loop: "{{ ha_cluster_fw_ports }}"
 
-- name: Ensuring the password for hacluster is configured 
-  user:
+- name: Preparing | Ensuring the password for hacluster is configured 
+  ansible.builtin.user:
     name: hacluster
     password: "{{ ha_cluster_password | password_hash('sha512') }}"
 
-- name: Ensuring the pcsd service is started and enabled 
-  service:
+- name: Preparing | Ensuring the pcsd service is started and enabled 
+  ansible.builtin.service:
     name: pcsd
     state: started
     enabled: yes

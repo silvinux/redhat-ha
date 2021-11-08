@@ -1,9 +1,7 @@
 ---
-# Task file that creates a fence resource using the fence_ipmilan fencing agent.
-
-
-- name: Checking if the STONITH resource exists
-  command:
+# Task file that creates a fence resource using the fence_cisco_ucs fencing agent.
+- name: STONITH | Checking if the STONITH resource exists
+  ansible.builtin.command:
     cmd: "pcs stonith config {{ item['id'] }}"
   register: stonith_resource_exits
   failed_when: false
@@ -12,8 +10,8 @@
 - debug:
     msg: "fence_cisco_ucs"
 
-- name: Ensuring the fence resource exists
-  command:
+- name: STONITH | Ensuring the fence resource exists
+  ansible.builtin.command:
     cmd: "pcs stonith create {{ item['id'] }} fence_cisco_ucs
             pcmk_host_list={{ item['port'] | lower }}
             ipaddr={{ item['ipaddr'] }}
@@ -29,8 +27,8 @@
   changed_when: "'already exists' not in fence_resource['stdout']"
   when: stonith_resource_exits['rc'] != 0
 
-- name: Ensuring the fence resource is updated
-  command:
+- name: STONITH | Ensuring the fence resource is updated
+  ansible.builtin.command:
     cmd: "pcs stonith update {{ item['id'] }}
             pcmk_host_list={{ item['port'] | lower }}
             ipaddr={{ item['ipaddr'] }}

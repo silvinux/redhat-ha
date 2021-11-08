@@ -1,5 +1,5 @@
 ---
-- name: Checking if the global STONITH timeout is set
+- name: STONITH | Checking if the global STONITH timeout is set
   command:
     cmd: pcs property show stonith-timeout
   register: stonith
@@ -11,12 +11,12 @@
 - debug:
     msg: "{{ 'stonith-timeout: ' + stonith_timeout|string + 's' }}"
 
-- name: Ensuring the global STONITH timeout is set
+- name: STONITH | Ensuring the global STONITH timeout is set
   command:
     cmd: "pcs property set stonith-timeout={{ stonith_timeout }}s"
   when: "('stonith-timeout: ' + stonith_timeout|string + 's')
         not in stonith['stdout']"
-#
+
 #- debug:
 #    msg: "{{ hostvars[item]['ipmi_ip'] }}"
 #    #msg: "{{ 'fence_' + hostvars[item]['inventory_hostname_short'] }}"
@@ -24,28 +24,30 @@
 #  run_once: true
     
 - block:
-  - set_fact:
+  - name: STONITH | Set fence agent type
+    set_fact:
+      fence_agent: fence_xvm
+
+  - name: STONITH | Set fence agent attributes
+    set_fact:
       fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'key_file': stonith_kvm_key_file_path, 'port': hostvars[item]['inventory_hostname_short'], 'node': hostvars[item]['inventory_hostname']  } ] }}"
     loop: "{{ groups['nodes-prv'] }}"
     run_once: true
 
-  - set_fact:
-      fence_agent: fence_xvm
-
-  - name: Ensuring the required ports are open
+  - name: STONITH | Ensuring the required ports are open
     ansible.posix.firewalld:
       port: 1229/tcp
       permanent: yes
       state: enabled
       immediate: yes
   
-  - name: Create a directory if it does not exist
+  - name: STONITH | Create a directory /etc/cluster/
     ansible.builtin.file:
       path: /etc/cluster/
       state: directory
       mode: '0755'
   
-  - name: Copy file with owner and permissions
+  - name: STONITH | Copy file with owner and permissions
     ansible.builtin.copy:
       src: /tmp/fence_xvm.key
       dest: /etc/cluster/fence_xvm.key
@@ -56,24 +58,30 @@
   when: ansible_system_vendor == "Red Hat"
 
 - block:  
-  - set_fact:
+  - name: STONITH | Set fence agent type
+    set_fact:
+      fence_agent: fence_cisco_ucs
+
+  - name: STONITH | Set fence agent attributes
+    set_fact:
       fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': stonith_cisco_ucs_ipaddr, 'port': inventory_hostname_short, 'login': stonith_cisco_ucs_login, 'password': stonith_cisco_ucs_passwd, 'suborg': stonith_cisco_ucs_suborg } ] }}"
       #fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': hostvars[item]['stonith_cisco_ucs_ipaddr'], 'port': hostvars[item]['inventory_hostname_short'], 'login': hostvars[item]['stonith_cisco_ucs_login'], 'password': hostvars[item]['stonith_cisco_ucs_passwd'], 'suborg': hostvars[item]['stonith_cisco_ucs_suborg'] } ] }}"
     loop: "{{ groups['nodes-prv'] }}"
     run_once: true
 
-  - set_fact:
-      fence_agent: fence_cisco_ucs
-
   when: ansible_system_vendor == "Cisco Systems Inc"
+
 - block:
-  - set_fact:
+  - name: STONITH | Set fence agent type
+    set_fact:
+      fence_agent: fence_ipmilan
+
+  - name: STONITH | Set fence agent type
+    set_fact:
       fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ip': hostvars[item]['stonith_ipmi_ip'], 'node': hostvars[item]['inventory_hostname'], 'login': stonith_ipmi_login, 'password': stonith_ipmi_password } ] }}"
     loop: "{{ groups['nodes-prv'] }}"
     run_once: true
 
-  - set_fact:
-      fence_agent: fence_ipmilan
   when: ansible_system_vendor != "Cisco Systems Inc" and ansible_system_vendor != "Red Hat"
 
 - debug:
@@ -84,9 +92,8 @@
   no_log: false
 
 
-- name: Ensuring the STONITH resources exist
+- name: STONITH | Ensuring the STONITH resources exist
   include_tasks: "create_{{ fence_agent }}.yml"
   loop: "{{ fence_agent_attributes }}"
   run_once: true
-
 ...

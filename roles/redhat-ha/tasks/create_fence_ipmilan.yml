@@ -14,15 +14,15 @@
 - debug:
     msg: "{{ item['id'] }}"
 
-- name: Checking if the STONITH resource exists
-  command:
+- name: STONITH | Checking if the STONITH resource exists
+  ansible.builtin.command:
     cmd: "pcs stonith config {{ item['id'] }}"
   register: stonith_resource_exits
   failed_when: false
   changed_when: false
 
-- name: Ensuring the fence resource exists
-  command:
+- name: STONITH | Ensuring the fence resource exists
+  ansible.builtin.command:
     cmd: "pcs stonith create {{ item['id'] }} fence_ipmilan
             pcmk_host_list={{ item['node'] }}
             ip={{ item['ip'] }}
@@ -36,8 +36,8 @@
   changed_when: "'already exists' not in fence_resource['stdout']"
   when: stonith_resource_exits['rc'] != 0
 
-- name: Ensuring the fence resource is updated
-  command:
+- name: STONITH | Ensuring the fence resource is updated
+  ansible.builtin.command:
     cmd: "pcs stonith update {{ item['id'] }}
             pcmk_host_list={{ item['node'] }}
             ip={{ item['ip'] }}
