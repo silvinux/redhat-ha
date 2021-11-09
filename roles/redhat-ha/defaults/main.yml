@@ -47,3 +47,11 @@ ha_quorum_dev_system_packages:
   - pcs
   - corosync-qdevice
 ha_quorum_device_net_algorithm: ffsplit    
+
+## Resources
+ha_floating_ip_wait: 60
+
+ha_resource_monitor_interval: 120 
+ha_resource_monitor_timeout: 120 
+ha_resource_start_timeout: 120 
+ha_resource_stop_timeout: 120

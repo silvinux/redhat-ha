@@ -36,4 +36,22 @@
     apply:
       tags: quorum
   tags: quorum
+
+- name: Include Tasks to configure resources
+  include_tasks: 05-create-lvm-fs.yml
+  args:
+    apply:
+      tags: create-lvm-fs
+  tags: create-lvm-fs
+  when: ('nodes' in group_names) 
+
+- name: Include Tasks to configure resources
+  include_tasks: 05-create-resources.yml
+  args:
+    apply:
+      tags: create-resources
+  tags: create-resources
+  when: ('nodes' in group_names) 
+  #  loop: "{{ ha_resources_list }}" 
+  #  run_once: true
 ...  

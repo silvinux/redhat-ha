@@ -1,0 +1,25 @@
+ha_lvm_fs_list:
+- ha_instance_name: instance_1
+  ha_vg_name: vg01a
+  ha_storage_devices:
+  - /dev/vdb
+  - /dev/vdc
+  ha_fs:
+  - { resource_name: admin, lvname: lvol01, lvsize: 1G, fstype: xfs, mntpoint: /u01/app/oracle/admin/HA_INSTANCE_NAME }
+  - { resource_name: recovery, lvname: lvol02, lvsize: 1G, fstype: xfs, mntpoint: /u01/app/oracle/flash_recovery_area/HA_INSTANCE_NAME }
+  - { resource_name: diag, lvname: lvol03, lvsize: 1G, fstype: xfs, mntpoint: /u01/app/oracle/diag/rdbms/HA_INSTANCE_NAME }
+- ha_instance_name: instance_1
+  ha_vg_name: vg02b
+  ha_storage_devices:
+  - /dev/vdd
+  - /dev/vde
+  ha_fs:
+  - { resource_name: data, lvname: lvol01, lvsize: 1G, fstype: xfs, mntpoint: /u02/app/oracle/oradata/HA_INSTANCE_NAME }
+  - { resource_name: exp, lvname: lvol02, lvsize: 1G, fstype: xfs, mntpoint: /u01/app/oracle/admin/HA_INSTANCE_NAME/exp  }
+
+ipaddr2_list:
+- ha_floating_ip_name: vipcluter2
+  ha_floating_ip_addr: 10.0.0.66
+  ha_floating_ip_netmask: 24
+  ha_rg_name: GLOBAL
+

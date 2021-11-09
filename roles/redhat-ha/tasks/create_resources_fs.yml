@@ -1,0 +1,33 @@
+---
+#- debug:
+#    msg:
+#      - "{{ item.0.ha_instance_name }}_{{ item.1.resource_name }}"
+#       #- "{{ item.0.ha_instance_name }}_{{ item.0.ha_vg_name}}"
+#       #- "{{ item.0.ha_vg_name}}"
+#       #- "{{ item.1.resource_name }}"
+#       #- "{{ item.1.lvname}}"  
+#       #- "{{ item.1.lvsize }}"  
+#       #- "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"
+  
+
+- name: STONITH | Checking if the STONITH resource exists
+  ansible.builtin.command:
+    cmd: "pcs resource config {{ item.0.ha_instance_name }}_{{ item.1.resource_name }}"
+  register: fs_resource_exits
+  failed_when: false
+  changed_when: false    
+
+- name: STONITH | Ensuring the fence resource CREATE
+  ansible.builtin.command:
+    cmd: "pcs resource create {{ item.0.ha_instance_name }}_{{ item.1.resource_name }} Filesystem 
+    device=/dev/{{ item.0.ha_vg_name }}/{{ item.1.lvname }} directory={{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}
+    fstype={{ item.1.fstype }} --group={{ item.0.ha_instance_name }} 
+    op monitor interval={{ ha_resource_monitor_interval }}s 
+    timeout={{ ha_resource_monitor_timeout }}s 
+    start timeout={{ ha_resource_start_timeout }}s
+    stop timeout={{ ha_resource_stop_timeout }}s"
+
+  register: filesystem_resource
+  changed_when: "'already exists' not in fs_resource_exits['stdout']"
+  when: fs_resource_exits['rc'] != 0
+...

@@ -1,0 +1,123 @@
+---
+- name: Ensure system_id_source is set to uname in lvm.conf
+  ansible.builtin.lineinfile:
+    path: /etc/lvm/lvm.conf
+    regexp: '^\s*system_id_source = \"none\"'
+    line: '        system_id_source = "uname"'
+    backrefs: yes
+    backup: yes
+    state: present    
+
+- debug:
+    msg: "{{ item.ha_storage_devices }}"
+  loop: "{{ ha_lvm_fs_list }}"
+  run_once: true
+
+- set_fact:
+    ha_storage_devices_raw: "{{ ha_storage_devices_raw | default([]) + item.ha_storage_devices  }}"
+  loop: "{{ ha_lvm_fs_list }}"
+  run_once: true
+
+- debug:
+    msg: "{{ item }}"
+  loop: "{{ ha_storage_devices_raw }}"
+  run_once: true
+
+- name: Create a new primary partition
+  community.general.parted:
+    device: "{{ item }}"
+    number: 1
+    state: present
+  loop: "{{ ha_storage_devices_raw }}"
+  run_once: true
+
+- debug:
+    msg:
+            #- "{{ item.0.ha_instance_name }}"
+      - "{{ item.ha_vg_name }}"
+      - "{{ item.ha_storage_devices | product(['1']) | map('join') | list }}"
+        #- "{{ item.0.ha_storage_devices | product(['1']) | map('join') | list }}"
+            #- "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"
+  loop: "{{ ha_lvm_fs_list }}"
+  run_once: true
+  
+- name: Create a volume group on top of /dev/sda1 with physical extent size = 32MB
+  community.general.lvg:
+    vg: "{{ item.ha_vg_name }}"
+    pvs: "{{ item.ha_storage_devices | product(['1']) | map('join') | list }}"
+  loop: "{{ ha_lvm_fs_list }}"
+  run_once: true
+
+- debug:
+    msg:
+      - "{{ item.0.ha_vg_name}}"
+      - "{{ item.1.lvname}}"
+      - "{{ item.1.lvsize }}"
+        #- "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true
+
+  #- debug: 
+  #    msg: "{{ ansible_devices.[1].partitions }}"
+  
+- name: Create a logical volume of 512m
+  community.general.lvol:
+    vg: "{{ item.0.ha_vg_name}}" 
+    lv:  "{{ item.1.lvname}}"
+    size: "{{ item.1.lvsize }}"
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true
+
+- debug:
+    msg:
+      - "{{ item.0.ha_vg_name}}"
+      - "{{ item.1.lvname }}"
+      - "{{ item.1.fstype }}"
+        #- "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true  
+  
+- name: Create a filesystem on a lvm device
+  community.general.filesystem:
+    fstype: "{{ item.1.fstype }}"
+    dev: "/dev/{{ item.0.ha_vg_name }}/{{ item.1.lvname }}"
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true  
+## LV creation
+  #
+  #
+  #
+  #
+  #
+  #- name: STONITH | Checking if the STONITH resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource config {{ item['ha_resource_LVM_name'] }}"
+  #  register: lvm_resource_exits
+  #  failed_when: false
+  #  changed_when: false    
+  #
+  #
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:    
+  #    cmd: "pcs resource create {{ item.ha_resource_LVM_name }} ocf:heartbeat:LVM-activate 
+  #    vgname={{ item.ha_vg_name }} vg_access_mode=system_id --group HA-LVM"
+  #  register: lvm_resource
+  #  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+  #  when: lvm_resource_exits['rc'] != 0
+  #
+  #
+  #- name: STONITH | Checking if the STONITH resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource config {{ item['ha_resource_fs'] }}"
+  #  register: fs_resource_exits
+  #  failed_when: false
+  #  changed_when: false  
+  #
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource create {{ item.ha_resource_fs }} Filesystem 
+  #    device=/dev/{{ item.ha_vg_name }}/{{ item.ha_resource_fs }} directory={{ item.ha_resource_fs_mount }} fstype={{ item.ha_resource_fs_type }} --group HA-LVM"
+  #  register: filesystem_resource
+  #  changed_when: "'already exists' not in fs_resource_exits['stdout']"
+  #  when: fs_resource_exits['rc'] != 0
+...

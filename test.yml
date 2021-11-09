@@ -1,0 +1,65 @@
+---
+- name: Deploying a Red Hat High Availability cluster
+  hosts:  nodes
+  #hosts: localhost
+  #connection: local
+  become: yes
+  gather_facts: yes
+  throttle: 1
+  #vars:
+  #  ansible_system_vendor: "Cisco Systems Inc"
+  tasks:
+    - debug:
+        msg: "{{ ha_lvm_fs_list }}"
+      run_once: true
+
+    - debug:
+        msg: 
+         #- "{{ item.ha_rsrc_storage_devices }}"
+         - "{{ item.ha_fs }}"
+           #loop: "{{ ha_lvm_fs_list | dict2items }}"
+      loop: "{{ ha_lvm_fs_list }}"
+      run_once: true
+
+    - debug:
+        msg:
+         - "{{ item.0.ha_instance_name }}"
+         - "{{ item.0.ha_vg_name}}"
+           #- "{{ item.1.lvname}}"  
+           #- "{{ item.1.lvsize }}"  
+         - "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"  
+      loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+      run_once: true      
+
+    - debug:
+        msg: 
+        - "{{ item.ha_floating_ip_name }}"
+        - "{{ item.ha_floating_ip_addr }}"
+        - "{{ item.ha_floating_ip_netmask }}"
+      loop: "{{ ipaddr2_list }}"
+      run_once: true
+
+      #- name: with_subelements -> loop
+      #  ansible.builtin.debug:
+      #    msg: "{{ item.0.name }} - {{ item.1 }}"
+      #  loop: "{{ users|subelements('mysql.hosts') }}"      
+
+          #- set_fact:
+          #    fence_agent_from_vendor: "{{ ansible_system_vendor | replace(' ','') | lower }}"            
+
+          #- set_fact:
+          #    fence_agent: fence_cisco_ucs
+          #  when: ansible_system_vendor == "Cisco Systems Inc"
+
+          #- set_fact:
+          #    fence_agent: fence_ipmilan
+          #  when: ansible_system_vendor != "Cisco Systems Inc"
+
+
+      #- debug:
+      #    msg: 
+      #      - "{{ ansible_system_vendor | replace(' ','') | lower }}"
+      #      - "{{ ipmi_ip }}"  
+      #        #- "{{ cisco_ucs_ipaddr }}"
+      #      - "{{ fence_agent }}"  
+...

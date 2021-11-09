@@ -1,0 +1,34 @@
+---
+- debug:
+    msg:
+    - "{{ item.ha_floating_ip_addr }}"
+    - "{{ item.ha_floating_ip_netmask }}"
+
+- name: STONITH | Checking if the STONITH resource exists
+  ansible.builtin.command:
+    cmd: "pcs resource config {{ item.ha_floating_ip_name }}"
+  register: floating_ip_resource_exits
+  failed_when: false
+  changed_when: false    
+
+- debug:
+    msg: "{{ item }}"  
+  when: floating_ip_resource_exits['rc'] != 0
+
+
+- name: STONITH | Ensuring the fence resource exists
+  ansible.builtin.command:    
+    cmd: "pcs resource create {{ item.ha_floating_ip_name }} ocf:heartbeat:IPaddr2
+    ip={{ item.ha_floating_ip_addr }} cidr_netmask={{ item.ha_floating_ip_netmask }} --wait={{ ha_floating_ip_wait }} --group={{ item.ha_rg_name }}"
+  register: ip_resource_creation
+  changed_when: "'already exists' not in floating_ip_resource_exits['stdout']"
+  when: floating_ip_resource_exits['rc'] != 0
+
+- name: STONITH | Ensuring the fence resource exists UPDATE
+  ansible.builtin.command:
+    cmd: "pcs resource update {{ item.ha_floating_ip_name }} ocf:heartbeat:IPaddr2
+    ip={{ item.ha_floating_ip_addr }} cidr_netmask={{ item.ha_floating_ip_netmask }} --wait={{ ha_floating_ip_wait }}"
+  register: ip_resource_update
+  changed_when: "'already exists' not in floating_ip_resource_exits['stdout']"
+  when: floating_ip_resource_exits['rc'] == 0
+...

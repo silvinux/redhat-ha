@@ -1,0 +1,63 @@
+---
+- debug:
+    msg:
+     - "{{ item.ha_vg_name}}"
+     - "{{ item.ha_instance_name }}"  
+  
+
+- name: STONITH | Checking if the STONITH resource exists
+  ansible.builtin.command:
+    cmd: "pcs resource config {{ item.ha_instance_name }}_{{ item.ha_vg_name}}"
+  register: lvm_resource_exits
+  failed_when: false
+  changed_when: false    
+
+- name: STONITH | Ensuring the fence resource exists
+  ansible.builtin.command:    
+    cmd: "pcs resource create {{ item.ha_instance_name }}_{{ item.ha_vg_name}} ocf:heartbeat:LVM-activate 
+    vgname={{ item.ha_vg_name }} vg_access_mode=system_id --group={{ item.ha_instance_name }}  
+    op monitor interval={{ ha_resource_monitor_interval }}s 
+    timeout={{ ha_resource_monitor_timeout }}s
+    start timeout={{ ha_resource_start_timeout }}s 
+    stop timeout={{ ha_resource_stop_timeout }}s"
+  register: lvm_resource
+  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+  when: lvm_resource_exits['rc'] != 0
+
+- name: STONITH | Ensuring the fence resource exists UPDATE
+  ansible.builtin.command:
+    cmd: "pcs resource update {{ item.ha_instance_name }}_{{ item.ha_vg_name}} ocf:heartbeat:LVM-activate 
+    vgname={{ item.ha_vg_name }} vg_access_mode=system_id
+    op monitor interval={{ ha_resource_monitor_interval }}s 
+    timeout={{ ha_resource_monitor_timeout }}s 
+    start timeout={{ ha_resource_start_timeout }}s 
+    stop timeout={{ ha_resource_stop_timeout }}s"
+  register: lvm_resource
+  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+  when: lvm_resource_exits['rc'] == 0  
+
+
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:    
+  #    cmd: "pcs resource create {{ item.ha_resource_LVM_name }} ocf:heartbeat:LVM-activate 
+  #    vgname={{ item.ha_vg_name }} vg_access_mode=system_id --group HA-LVM"
+  #  register: lvm_resource
+  #  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+  #  when: lvm_resource_exits['rc'] != 0
+  #
+  #
+  #- name: STONITH | Checking if the STONITH resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource config {{ item['ha_resource_fs'] }}"
+  #  register: fs_resource_exits
+  #  failed_when: false
+  #  changed_when: false  
+  #
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource create {{ item.ha_resource_fs }} Filesystem 
+  #    device=/dev/{{ item.ha_vg_name }}/{{ item.ha_resource_fs }} directory={{ item.ha_resource_fs_mount }} fstype={{ item.ha_resource_fs_type }} --group HA-LVM"
+  #  register: filesystem_resource
+  #  changed_when: "'already exists' not in fs_resource_exits['stdout']"
+  #  when: fs_resource_exits['rc'] != 0
+...

@@ -14,8 +14,9 @@
   ansible.builtin.command:
     cmd: "pcs stonith create {{ item['id'] }} fence_xvm
             pcmk_host_list={{ item['node'] }}
+            port={{ item['port']  }}
             key_file={{ item['key_file'] }}
-            pcmk_reboot_action=1
+            pcmk_reboot_action=reboot
             op monitor interval={{ stonith_monitor_interval }}s
             meta failure-timeout={{ stonith_failure_timeout }}s migration-threshold={{ stonith_migration_threshold }}"
   register: fence_resource             
@@ -24,10 +25,11 @@
 
 - name: STONITH | Ensuring the fence resource is updated
   ansible.builtin.command:
-    cmd: "pcs stonith create {{ item['id'] }} fence_xvm
+    cmd: "pcs stonith update {{ item['id'] }} fence_xvm
             pcmk_host_list={{ item['node'] }}
+            port={{ item['port']  }}
             key_file={{ item['stonith_kvm_key_file'] }}
-            pcmk_reboot_action=1
+            pcmk_reboot_action=reboot
             op monitor interval={{ stonith_monitor_interval }}s
             meta failure-timeout={{ stonith_failure_timeout }}s migration-threshold={{ stonith_migration_threshold }}"
   when: stonith_resource_exits['rc'] == 0

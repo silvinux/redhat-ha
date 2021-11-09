@@ -1,0 +1,104 @@
+---
+#- name: STONITH | Ensuring the STONITH resources exist
+#  include_tasks: "create_resources_ips.yml"
+#  loop: "{{ ipaddr2_list }}"
+#  run_once: true
+
+#- name: STONITH | Ensuring the STONITH resources exist
+#  include_tasks: "create_resources_lvm.yml"
+#  loop: "{{ ha_lvm_fs_list }}"
+#  run_once: true
+
+- name: STONITH | Ensuring the STONITH resources exist
+  include_tasks: "create_resources_fs.yml"
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true
+  
+
+#- debug:
+#    msg:
+#    - "{{ item.ha_floating_ip_addr }}"
+#    - "{{ item.ha_floating_ip_netmask }}"
+#  loop: "{{ ipaddr2_list }}"
+#  run_once: true
+#
+#- name: STONITH | Checking if the STONITH resource exists
+#  ansible.builtin.command:
+#    cmd: "pcs resource config {{ item.ha_floating_ip_name }}"
+#  register: floating_ip_resource_exits
+#  failed_when: false
+#  changed_when: false    
+#  loop: "{{ ipaddr2_list }}"
+#  run_once: true
+#
+#- debug:
+#    msg: "{{ item }}"  
+#  loop: "{{ ipaddr2_list }}"
+#  run_once: true
+#  #  when: floating_ip_resource_exits['rc'] != 0
+
+
+    #- name: STONITH | Ensuring the fence resource exists
+    #  ansible.builtin.command:    
+    #    cmd: "pcs resource create {{ item.ha_floating_ip_name }} ocf:heartbeat:IPaddr2
+    #    ip={{ item.ha_floating_ip_addr }} cidr_netmask={{ item.ha_floating_ip_netmask }} --wait={{ ha_floating_ip_wait }} --group=GLOBAL"
+    #  register: ip_resource_creation
+    #  changed_when: "'already exists' not in floating_ip_resource_exits['stdout']"
+    #  when: floating_ip_resource_exits['rc'] != 0
+    #  loop: "{{ ipaddr2_list }}"
+    #  run_once: true
+    #
+    #- name: STONITH | Ensuring the fence resource exists
+    #  ansible.builtin.command:
+    #    cmd: "pcs resource update {{ item.ha_floating_ip_name }} ocf:heartbeat:IPaddr2
+    #    ip={{ item.ha_floating_ip_addr }} cidr_netmask={{ item.ha_floating_ip_netmask }} --wait={{ ha_floating_ip_wait }} --group=GLOBAL"
+    #  register: ip_resource_creation
+    #  changed_when: "'already exists' not in floating_ip_resource_exits['stdout']"
+    #  when: floating_ip_resource_exits['rc'] == 0
+    #  loop: "{{ ipaddr2_list }}"
+    #  run_once: true  
+    
+  #- debug:
+  #    msg:
+  #     - "{{ item.0.ha_instance_name }}_{{ item.0.ha_vg_name}}"
+  #     - "{{ item.0.ha_vg_name}}"
+  #       #- "{{ item.1.lvname}}"  
+  #       #- "{{ item.1.lvsize }}"  
+  #     - "{{ item.1.mntpoint | replace('HA_INSTANCE_NAME',item.0.ha_instance_name)}}"
+  #  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  #  run_once: true
+    
+
+    #- name: STONITH | Ensuring the fence resource exists
+    #  ansible.builtin.command:    
+    #    cmd: "pcs resource create {{ item.ha_resource_LVM_name }} ocf:heartbeat:LVM-activate 
+    #    vgname={{ item.ha_vg_name }} vg_access_mode=system_id --group HA-LVM"
+    #  register: lvm_resource
+    #  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+    #  when: lvm_resource_exits['rc'] != 0
+
+
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:    
+  #    cmd: "pcs resource create {{ item.ha_resource_LVM_name }} ocf:heartbeat:LVM-activate 
+  #    vgname={{ item.ha_vg_name }} vg_access_mode=system_id --group HA-LVM"
+  #  register: lvm_resource
+  #  changed_when: "'already exists' not in lvm_resource_exits['stdout']"
+  #  when: lvm_resource_exits['rc'] != 0
+  #
+  #
+  #- name: STONITH | Checking if the STONITH resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource config {{ item['ha_resource_fs'] }}"
+  #  register: fs_resource_exits
+  #  failed_when: false
+  #  changed_when: false  
+  #
+  #- name: STONITH | Ensuring the fence resource exists
+  #  ansible.builtin.command:
+  #    cmd: "pcs resource create {{ item.ha_resource_fs }} Filesystem 
+  #    device=/dev/{{ item.ha_vg_name }}/{{ item.ha_resource_fs }} directory={{ item.ha_resource_fs_mount }} fstype={{ item.ha_resource_fs_type }} --group HA-LVM"
+  #  register: filesystem_resource
+  #  changed_when: "'already exists' not in fs_resource_exits['stdout']"
+  #  when: fs_resource_exits['rc'] != 0
+...
