@@ -64,7 +64,7 @@
 
   - name: STONITH | Set fence agent attributes
     set_fact:
-      fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': stonith_cisco_ucs_ipaddr, 'port': inventory_hostname_short, 'login': stonith_cisco_ucs_login, 'password': stonith_cisco_ucs_passwd, 'suborg': stonith_cisco_ucs_suborg } ] }}"
+      fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': stonith_cisco_ucs_ipaddr, 'port': hostvars[item]['inventory_hostname_short'], 'login': stonith_cisco_ucs_login, 'password': stonith_cisco_ucs_passwd, 'suborg': stonith_cisco_ucs_suborg } ] }}"
       #fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': hostvars[item]['stonith_cisco_ucs_ipaddr'], 'port': hostvars[item]['inventory_hostname_short'], 'login': hostvars[item]['stonith_cisco_ucs_login'], 'password': hostvars[item]['stonith_cisco_ucs_passwd'], 'suborg': hostvars[item]['stonith_cisco_ucs_suborg'] } ] }}"
     loop: "{{ groups['nodes-prv'] }}"
     run_once: true

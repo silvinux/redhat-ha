@@ -32,6 +32,10 @@ Including an example of how to use your role (for instance, with variables passe
       roles:
          - { role: username.rolename, x: 42 }
 
+
+$ ansible-playbook -i inventory/cluster2  redhat-ha.yml --tags create-lvm-fs -e @varstest
+$ ansible-playbook -i inventory/cluster2  redhat-ha.yml --tags create-resources -e @varstest
+
 License
 -------
 

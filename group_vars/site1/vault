@@ -3,7 +3,7 @@ vault_ipmi_ip: 192.168.0.100
 vault_ipmi_login: admin
 vault_ipmi_password: redhat00
 vault_cisco_ucs_ipaddr: UCS-SITE1
-vault_cisco_ucs_login: "ucs\fencepassword"
+vault_cisco_ucs_login: 'ucs\fencepassword'
 vault_cisco_ucs_passwd: password
 vault_cisco_ucs_suborg: "org-TEST"
 ...

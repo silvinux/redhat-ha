@@ -2,18 +2,23 @@
 localhost
 
 [nodes]
-node1.bcnconsulting.com
-node2.bcnconsulting.com
+#node1.bcnconsulting.com
+#node2.bcnconsulting.com
+node1
+node2
 
 [site1]
-node1-prv.bcnconsulting.com 
+#node1-prv.bcnconsulting.com 
+node1
 
 [site2]
-node2-prv.bcnconsulting.com 
+#node2-prv.bcnconsulting.com 
+node2
 
 [nodes-prv:children]
-site1
-site2
+#site1
+#site2
+nodes
 
 [quorum]
 quorum.bcnconsulting.com
