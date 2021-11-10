@@ -1,17 +1,17 @@
 ---
-- name: Quorum | Ensure required repos are enabled
+- name: QUORUM | Ensure required repos are enabled
   community.general.rhsm_repository:
     name: "{{ ha_cluster_rhsm_repos }}"
     state: enabled
   when: groups['nodes'] and groups['quorum'] 
 
 - block:  
-  - name: Quorum | Ensuring the cluster packages are present
+  - name: QUORUM | Ensuring the cluster packages are present
     ansible.builtin.dnf:
       name: "{{ ha_quorum_cluster_packages }}"
       state: present
 
-  - name: Quorum | Ensuring the required ports are open
+  - name: QUORUM | Ensuring the required ports are open
     ansible.posix.firewalld:
       service: "{{ item }}"
       permanent: yes
@@ -19,18 +19,18 @@
       immediate: yes
     loop: "{{ ha_cluster_fw_ports }}"
   
-  - name: Quorum | Ensuring the password for hacluster is configured 
+  - name: QUORUM | Ensuring the password for hacluster is configured 
     ansible.builtin.user:
       name: hacluster
       password: "{{ ha_cluster_password | password_hash('sha512') }}"
   
-  - name: Quorum | Ensuring the pcsd service is started and enabled
+  - name: QUORUM | Ensuring the pcsd service is started and enabled
     ansible.builtin.service:
       name: pcsd
       state: started
       enabled: yes
 
-  - name: Quorum | Get service facts
+  - name: QUORUM | Get service facts
     ansible.builtin.service_facts:
 
 #- name: try to work out how to access the service
@@ -39,14 +39,14 @@
 #      - "{{ ansible_facts.services['corosync-qnetd.service'] }}"
 #      - "{{ ansible_facts.services['corosync-qnetd.service'].state }}"
 
-  - name: Quorum | Checking if the qdevice net exists
+  - name: QUORUM | Checking if the qdevice net exists
     ansible.builtin.command:
       cmd: "pcs qdevice status net"
     register: pcs_qdevice_status_net_exits
     failed_when: false
     changed_when: false
 
-  - name: Quorum | Ensuring the qdevice is setup with model net
+  - name: QUORUM | Ensuring the qdevice is setup with model net
     ansible.builtin.command:
       cmd: "pcs qdevice setup model net --enable --start"
     register: pcs_device_setup_model_net_enable
@@ -55,12 +55,12 @@
   when: ('quorum' in group_names)
 
 - block:
-  - name: Quorum | Ensuring the cluster packages are present ha_quorum_dev_system_packages
+  - name: QUORUM | Ensuring the cluster packages are present ha_quorum_dev_system_packages
     ansible.builtin.dnf:
       name: "{{ ha_quorum_dev_system_packages }}"
       state: present
 
-  - name: Quorum | Ensuring the quorum device server is authenticated
+  - name: QUORUM | Ensuring the quorum device server is authenticated
     ansible.builtin.command:
       cmd: "pcs host auth -u hacluster -p {{ ha_cluster_password }}
             {{ groups['quorum'] | join(' ') }}"
@@ -71,14 +71,14 @@
     #  - debug:
     #      msg: "host={{ groups['quorum'][0] }}"
 
-  - name: Quorum | Checking if quorum device exists
+  - name: QUORUM | Checking if quorum device exists
     ansible.builtin.command:
       cmd: "pcs quorum device status"
     register: pcs_quorum_device_status_exists
     failed_when: false
     changed_when: false
 
-  - name: Quorum | Add quorum device model net to quorum host
+  - name: QUORUM | Add quorum device model net to quorum host
     ansible.builtin.command:
       cmd: "pcs quorum device add model net host={{ groups['quorum'][0] }} algorithm={{ ha_quorum_device_net_algorithm }}"
     register: quorum_device_add

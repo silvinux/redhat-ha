@@ -37,7 +37,7 @@
       tags: quorum
   tags: quorum
 
-- name: Include Tasks to configure resources
+- name: Include Tasks to configure storage layer
   include_tasks: 05-create-lvm-fs.yml
   args:
     apply:
@@ -45,13 +45,33 @@
   tags: create-lvm-fs
   when: ('nodes' in group_names) 
 
-- name: Include Tasks to configure resources
-  include_tasks: 05-create-resources.yml
+- name: Include Tasks to configure IPaddr2 resources
+  include_tasks: 06-create_resources_ips.yml
   args:
     apply:
-      tags: create-resources
-  tags: create-resources
+      tags: create-resources-ips
+  tags: create-resources-ips
+  loop: "{{ ipaddr2_list }}"
+  run_once: true
   when: ('nodes' in group_names) 
-  #  loop: "{{ ha_resources_list }}" 
-  #  run_once: true
+
+- name: Include Tasks to configure LVM resources
+  include_tasks: 07-create-resources-lvm.yml
+  args:
+    apply:
+      tags: create-resources-lvm
+  tags: create-resources-lvm
+  loop: "{{ ha_lvm_fs_list }}"
+  run_once: true
+  when: ('nodes' in group_names)
+
+- name: Include Tasks to configure Filesystem resources
+  include_tasks: 08-create-resources-fs.yml
+  args:
+    apply:
+      tags: create-resources-fs
+  tags: create-resources-fs
+  loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
+  run_once: true
+  when: ('nodes' in group_names)  
 ...  

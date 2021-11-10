@@ -1,5 +1,5 @@
 ---
-- name: Deploying | Check if HA subs is consumed
+- name: PREPARING | Check if HA subs is consumed
   ansible.builtin.command:
     cmd: subscription-manager list --consumed --matches="Red Hat Enterprise Linux High Availability for x86_64"
   register: ha_subs_is_consumed
@@ -9,40 +9,40 @@
     msg: TEST
   when: "'Red Hat Enterprise Linux High Availability for x86_64' not in ha_subs_is_consumed['stdout']"
 
-    #- name: Preparing | Register and subscribe to Red Hat Cluster Suite pool
-    #  community.general.redhat_subscription:
-    #    state: present
-    #    username: "{{ redhat_subscription_user }}"
-    #    password: "{{ redhat_subscription_password }}"
-    #    pool_ids: "{{ redhat_subscription_pool_id }}"
-    #  when: redhat_subscription_user is defined and redhat_subscription_password is defined and redhat_subscription_pool_id is defined 
-    #
-    #- name: Preparing | Ensure required repos are enabled
-    #  community.general.rhsm_repository:
-    #    name: "{{ ha_cluster_rhsm_repos }}"
-    #    state: enabled
-    #
-    #- name: Preparing | Ensuring the cluster packages are present
-    #  ansible.builtin.dnf:
-    #    state: present
-    #    name: "{{ ha_cluster_packages }}"
-    #
-    #- name: Preparing | Ensuring the required ports are open 
-    #  ansible.posix.firewalld:
-    #    service: "{{ item }}"
-    #    permanent: yes
-    #    state: enabled
-    #    immediate: yes
-    #  loop: "{{ ha_cluster_fw_ports }}"
-    #
-    #- name: Preparing | Ensuring the password for hacluster is configured 
-    #  ansible.builtin.user:
-    #    name: hacluster
-    #    password: "{{ ha_cluster_password | password_hash('sha512') }}"
-    #
-    #- name: Preparing | Ensuring the pcsd service is started and enabled 
-    #  ansible.builtin.service:
-    #    name: pcsd
-    #    state: started
-    #    enabled: yes
+  #- name: PREPARING | Register and subscribe to Red Hat Cluster Suite pool
+  #  community.general.redhat_subscription:
+  #    state: present
+  #    username: "{{ redhat_subscription_user }}"
+  #    password: "{{ redhat_subscription_password }}"
+  #    pool_ids: "{{ redhat_subscription_pool_id }}"
+  #  when: redhat_subscription_user is defined and redhat_subscription_password is defined and redhat_subscription_pool_id is defined 
+
+- name: PREPARING | Ensure required repos are enabled
+  community.general.rhsm_repository:
+    name: "{{ ha_cluster_rhsm_repos }}"
+    state: enabled
+
+- name: PREPARING | Ensuring the cluster packages are present
+  ansible.builtin.dnf:
+    state: present
+    name: "{{ ha_cluster_packages }}"
+
+- name: PREPARING | Ensuring the required ports are open 
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    permanent: yes
+    state: enabled
+    immediate: yes
+  loop: "{{ ha_cluster_fw_ports }}"
+
+- name: PREPARING | Ensuring the password for hacluster is configured 
+  ansible.builtin.user:
+    name: hacluster
+    password: "{{ ha_cluster_password | password_hash('sha512') }}"
+
+- name: PREPARING | Ensuring the pcsd service is started and enabled 
+  ansible.builtin.service:
+    name: pcsd
+    state: started
+    enabled: yes
 ...

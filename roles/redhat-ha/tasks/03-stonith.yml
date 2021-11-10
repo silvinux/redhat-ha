@@ -5,24 +5,12 @@
   register: stonith
   changed_when: false
 
-- debug:
-    msg: "{{ stonith }}"  
-
-- debug:
-    msg: "{{ 'stonith-timeout: ' + stonith_timeout|string + 's' }}"
-
 - name: STONITH | Ensuring the global STONITH timeout is set
   command:
     cmd: "pcs property set stonith-timeout={{ stonith_timeout }}s"
   when: "('stonith-timeout: ' + stonith_timeout|string + 's')
         not in stonith['stdout']"
 
-#- debug:
-#    msg: "{{ hostvars[item]['ipmi_ip'] }}"
-#    #msg: "{{ 'fence_' + hostvars[item]['inventory_hostname_short'] }}"
-#  loop: "{{ groups['nodes-prv'] }}"
-#  run_once: true
-    
 - block:
   - name: STONITH | Set fence agent type
     set_fact:
@@ -65,7 +53,6 @@
   - name: STONITH | Set fence agent attributes
     set_fact:
       fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': stonith_cisco_ucs_ipaddr, 'port': hostvars[item]['inventory_hostname_short'], 'login': stonith_cisco_ucs_login, 'password': stonith_cisco_ucs_passwd, 'suborg': stonith_cisco_ucs_suborg } ] }}"
-      #fence_agent_attributes: "{{ fence_agent_attributes | default([]) + [ {'id': 'fence_' + hostvars[item]['inventory_hostname_short'], 'ipaddr': hostvars[item]['stonith_cisco_ucs_ipaddr'], 'port': hostvars[item]['inventory_hostname_short'], 'login': hostvars[item]['stonith_cisco_ucs_login'], 'password': hostvars[item]['stonith_cisco_ucs_passwd'], 'suborg': hostvars[item]['stonith_cisco_ucs_suborg'] } ] }}"
     loop: "{{ groups['nodes-prv'] }}"
     run_once: true
 
@@ -92,7 +79,7 @@
   no_log: false
 
 
-- name: STONITH | Ensuring the STONITH resources exist
+- name: STONITH | Include task to create / update especific fence agent
   include_tasks: "create_{{ fence_agent }}.yml"
   loop: "{{ fence_agent_attributes }}"
   run_once: true

@@ -1,30 +1,30 @@
 ---
-- name: Deploying | Ensuring the cluster nodes are authenticated
+- name: DEPLOYING | Ensuring the cluster nodes are authenticated
   ansible.builtin.command:
     cmd: "pcs host auth -u hacluster -p {{ ha_cluster_password }}
           {{ groups['nodes-prv'] | join(' ') }}"
   register: auth_cluster
   changed_when: "'Authorized' in auth_cluster['stdout']"
 
-- name: Deploying | Checking the cluster configuration
+- name: DEPLOYING | Checking the cluster configuration
   ansible.builtin.stat:
     path: /etc/corosync/corosync.conf
   register: cluster_config
 
-- name: Deploying | Ensuring the cluster exists
+- name: DEPLOYING | Ensuring the cluster exists
   ansible.builtin.command:
     cmd: "pcs cluster setup {{ ha_cluster_name }} {{ groups['nodes-prv'] | join(' ') }}"
   register: create_cluster
   changed_when: "'successfully set up' in create_cluster['stdout']"
   when: not cluster_config['stat']['exists']
 
-- name: Deploying | Ensuring the cluster is enabled
+- name: DEPLOYING | Ensuring the cluster is enabled
   ansible.builtin.command:
     cmd: pcs cluster enable --all
   register: enable_cluster
   changed_when: "'Cluster Enabled' in enable_cluster['stdout']"
 
-- name: Deploying | Ensuring the cluster is started
+- name: DEPLOYING | Ensuring the cluster is started
   ansible.builtin.command:
     cmd: "pcs cluster start --all --request-timeout={{ ha_cluster_start_request_timeout }} --wait={{ ha_cluster_start_wait }}"
   register: start_cluster
