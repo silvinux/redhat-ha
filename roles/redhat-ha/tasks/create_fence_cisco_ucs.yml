@@ -17,7 +17,7 @@
             ipaddr={{ item['ipaddr'] }}
             login={{ item['login'] }}
             passwd={{ item['password'] }}
-            ssl_insecure=1
+            ssl_insecure=on
             suborg={{ item['suborg'] }}
             port={{ item['port'] | upper }}
             power_timeout={{ stonith_timeout }}
@@ -34,7 +34,7 @@
             ipaddr={{ item['ipaddr'] }}
             login={{ item['login'] }}
             passwd={{ item['password'] }}
-            ssl_insecure=1
+            ssl_insecure=on
             suborg={{ item['suborg'] }}
             port={{ item['port'] | upper }}
             power_timeout={{ stonith_timeout }}
