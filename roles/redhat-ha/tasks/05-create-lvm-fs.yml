@@ -58,20 +58,20 @@
       state: present
     loop: "{{ ha_storage_devices_raw }}"
     
-  - name: CREATE LVM FS | "Create a volume group on top of {{ item.ha_storage_devices }}"
+  - name: CREATE LVM FS | Create a volume group on top of phisical devices
     community.general.lvg:
       vg: "{{ item.ha_vg_name }}"
       pvs: "{{ item.ha_storage_devices | product(['1']) | map('join') | list }}"
     loop: "{{ ha_lvm_fs_list }}"
   
-  - name: CREATE LVM FS | "Create logical volume {{ item.1.lvname }} on volume groups {{ item.0.ha_vg_name }}"
+  - name: CREATE LVM FS | Create logical volumes
     community.general.lvol:
       vg: "{{ item.0.ha_vg_name}}" 
       lv:  "{{ item.1.lvname}}"
       size: "{{ item.1.lvsize }}"
     loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
   
-  - name: CREATE LVM FS | "Create filesystem {{ item.1.fstype }} over /dev/{{ item.0.ha_vg_name }}/{{ item.1.lvname }}"
+  - name: CREATE LVM FS | Create filesystem over the logical volumes
     community.general.filesystem:
       fstype: "{{ item.1.fstype }}"
       dev: "/dev/{{ item.0.ha_vg_name }}/{{ item.1.lvname }}"
