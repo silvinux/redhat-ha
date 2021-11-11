@@ -55,3 +55,16 @@ ha_resource_monitor_interval: 120
 ha_resource_monitor_timeout: 120 
 ha_resource_start_timeout: 120 
 ha_resource_stop_timeout: 120
+
+auto_activation_local_volume_group_list:
+- vg00
+- vg01
+- vg02
+- vg03
+- vg04
+
+reboot_pre_delay: 10
+reboot_post_delay: 65
+reboot_timeout: 1800
+reboot_test_command: uptime
+  

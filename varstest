@@ -12,14 +12,14 @@ ha_lvm_fs_list:
   ha_vg_name: vg02b
   ha_storage_devices:
   - /dev/vdd
-  - /dev/vde
+  #- /dev/vde
   ha_fs:
   - { resource_name: data, lvname: lvol01, lvsize: 1G, fstype: xfs, mntpoint: /u02/app/oracle/oradata/HA_INSTANCE_NAME }
   - { resource_name: exp, lvname: lvol02, lvsize: 1G, fstype: xfs, mntpoint: /u01/app/oracle/admin/HA_INSTANCE_NAME/exp  }
 
 ipaddr2_list:
-- ha_floating_ip_name: vipcluter2
-  ha_floating_ip_addr: 10.0.0.66
+- ha_floating_ip_name: vipcluter1
+  ha_floating_ip_addr: 10.0.0.65
   ha_floating_ip_netmask: 24
   ha_rg_name: GLOBAL
 
