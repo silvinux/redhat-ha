@@ -69,3 +69,15 @@ reboot_post_delay: 65
 reboot_timeout: 1800
 reboot_test_command: uptime
   
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_high_availability_clusters/assembly_controlling-cluster-behavior-configuring-and-managing-high-availability-clusters
+pcs_property_list:
+  - { pcs_property: symmetric-cluster, pcs_property_value: true }
+  - { pcs_property: stonith-timeout, pcs_property_value: 180s }
+  - { pcs_property: fence-reaction, pcs_property_value: stop }
+  - { pcs_property: no-quorum-policy, pcs_property_value: stop }
+
+# https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_high_availability_clusters/assembly_configuring-cluster-resources-configuring-and-managing-high-availability-clusters#proc_configuring-resource-meta-options-configuring-cluster-resources
+resource_meta_options_list:
+  - { pcs_resource_meta_option: is-managed, pcs_resource_meta_option_value: true }
+  - { pcs_resource_meta_option: resource-stickiness, pcs_resource_meta_option_value: 100 }
+  - { pcs_resource_meta_option: failure-timeout, pcs_resource_meta_option_value: 0 }

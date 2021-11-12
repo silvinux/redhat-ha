@@ -1,0 +1,9 @@
+---
+- name: Include Tasks to configure global cluster properties
+  include_tasks: set_pcs_properties.yml
+  loop: "{{ pcs_property_list }}"
+
+#- name: Include Tasks to configure global cluster options
+#  include_tasks: set_pcs_meta_options.yml
+#  loop: "{{ resource_meta_options_list }}"
+...

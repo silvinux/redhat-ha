@@ -38,14 +38,18 @@
 
   when: "{{ auto_activation_volume_output.changed }} != false or ( {{ system_id_source_output.changed }} != false and 'system ID: ' + ansible_nodename in lvm_systemid_output.stdout)"
 
-- block:
-  - name:  CREATE LVM FS | Scheduled Reboot
-    reboot:
-      pre_reboot_delay: "{{ reboot_pre_delay }}"
-      post_reboot_delay: "{{ reboot_post_delay }}"
-      reboot_timeout: "{{ reboot_timeout }}"
-      test_command: "{{ reboot_test_command }}"
+- name:  CREATE LVM FS | Scheduled Reboot
+  reboot:
+    pre_reboot_delay: "{{ reboot_pre_delay }}"
+    post_reboot_delay: "{{ reboot_post_delay }}"
+    reboot_timeout: "{{ reboot_timeout }}"
+    test_command: "{{ reboot_test_command }}"
+  when: 
+    - dracut_f_v_output.rc is defined 
+    - dracut_f_v_output.rc == 0
+     - "'Creating initramfs image file \\'/boot/initramfs-{{ ansible_kernel }}.img\\' done' in dracut_f_v_output.stderr"
 
+- block:
   - name: CREATE LVM FS | Populate storage devices raw list with all devices that needs to be partioned
     set_fact:
       ha_storage_devices_raw: "{{ ha_storage_devices_raw | default([]) + item.ha_storage_devices  }}"
@@ -78,8 +82,4 @@
     loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
 
   run_once: true  
-  when: 
-    - dracut_f_v_output.rc is defined 
-    - dracut_f_v_output.rc == 0
-    - "'Creating initramfs image file \\'/boot/initramfs-{{ ansible_kernel }}.img\\' done' in dracut_f_v_output.stderr"
 ...

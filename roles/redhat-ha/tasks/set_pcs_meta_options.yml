@@ -1,0 +1,22 @@
+---
+- name: SET GLOBAL CONFIG | Checking if the global resource option is set
+  command:
+    cmd: "pcs resource defaults"
+  register: global_resource_option
+  changed_when: false
+
+  #- debug:
+  #    msg: "{{ global_resource_option.stdout }}"
+  #
+  #- debug:
+  #    msg: "{{ item.pcs_resource_meta_option }}: {{ item.pcs_resource_meta_option_value | string | lower }}"
+  #
+  #- debug:
+  #    msg: "OK"
+  #  when: "'{{ item.pcs_resource_meta_option }}={{ item.pcs_resource_meta_option_value }}' not in global_resource_option.stdout"
+
+- name: SET GLOBAL CONFIG | Ensuring the global resource option is set
+  command:
+    cmd: "pcs resource defaults update {{ item.pcs_resource_meta_option }}={{ item.pcs_resource_meta_option_value }}"
+  when: "'{{ item.pcs_resource_meta_option }}={{ item.pcs_resource_meta_option_value }}' not in global_resource_option.stdout"
+...

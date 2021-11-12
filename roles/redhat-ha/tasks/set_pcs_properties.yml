@@ -1,0 +1,22 @@
+---
+- name: SET GLOBAL CONFIG | Checking if the global property is set
+  command:
+    cmd: "pcs property show {{ item.pcs_property }}"
+  register: global_property
+  changed_when: false
+
+  #- debug:
+  #    msg: "{{ global_property.stdout }}"
+  #
+  #- debug:
+  #    msg: "{{ item.pcs_property }}: {{ item.pcs_property_value | string | lower }}"
+  #
+  #- debug:
+  #    msg: "OK"
+  #  when: "'{{ item.pcs_property }}: {{ item.pcs_property_value }}' not in global_property.stdout"
+
+- name: SET GLOBAL CONFIG | Ensuring the global property is set
+  command:
+    cmd: "pcs property set {{ item.pcs_property }}={{ item.pcs_property_value }}"
+  when: "'{{ item.pcs_property }}: {{ item.pcs_property_value }}' not in global_property.stdout"
+...
