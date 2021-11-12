@@ -47,7 +47,7 @@
   when: 
     - dracut_f_v_output.rc is defined 
     - dracut_f_v_output.rc == 0
-     - "'Creating initramfs image file \\'/boot/initramfs-{{ ansible_kernel }}.img\\' done' in dracut_f_v_output.stderr"
+    - "'Creating initramfs image file \\'/boot/initramfs-{{ ansible_kernel }}.img\\' done' in dracut_f_v_output.stderr"
 
 - block:
   - name: CREATE LVM FS | Populate storage devices raw list with all devices that needs to be partioned
