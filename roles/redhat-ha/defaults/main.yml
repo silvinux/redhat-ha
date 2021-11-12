@@ -42,9 +42,9 @@ stonith_cisco_ucs_suborg:  "{{ vault_cisco_ucs_suborg }}"
 stonith_kvm_key_file_path: "/etc/cluster/fence_xvm.key"
 # Quorum
 ha_quorum_cluster_packages:
+  - pcs
   - corosync-qnetd        
 ha_quorum_dev_system_packages:
-  - pcs
   - corosync-qdevice
 ha_quorum_device_net_algorithm: ffsplit    
 
