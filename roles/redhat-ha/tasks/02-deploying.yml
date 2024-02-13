@@ -16,7 +16,19 @@
     cmd: "pcs cluster setup {{ ha_cluster_name }} {{ groups['nodes-prv'] | join(' ') }}"
   register: create_cluster
   changed_when: "'successfully set up' in create_cluster['stdout']"
-  when: not cluster_config['stat']['exists']
+  when: not cluster_config['stat']['exists'] and (cluster_multiple_links is not defined or not cluster_multiple_links)
+
+- name: Show host's ip
+  debug:
+    msg:
+      - "pcs cluster setup {{ ha_cluster_name }} {% for host in groups['nodes-prv'] %}{{ host }} addr={{ hostvars[host].ansible_eth1.ipv4.address }} addr={{ hostvars[host].ansible_eth0.ipv4.address }} {% endfor %}"
+
+- name: DEPLOYING | Ensuring the cluster exists Multiple Links
+  ansible.builtin.command:
+    cmd: "pcs cluster setup {{ ha_cluster_name }} {% for host in groups['nodes-prv'] %}{{ host }} addr={{ hostvars[host].ansible_eth1.ipv4.address }} addr={{ hostvars[host].ansible_eth0.ipv4.address }} {% endfor %}"
+  register: create_cluster
+  changed_when: "'successfully set up' in create_cluster['stdout']"
+  when: not cluster_config['stat']['exists'] and cluster_multiple_links
 
 - name: DEPLOYING | Ensuring the cluster is enabled
   ansible.builtin.command:

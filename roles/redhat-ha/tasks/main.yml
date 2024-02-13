@@ -7,28 +7,29 @@
       apply:
         tags: prerequisites
     tags: prerequisites
-  
+
   - name: Include Tasks to preparing the nodes for Red Hat High Availability cluster
     include_tasks: 01-preparing.yml
     args:
       apply:
         tags: preparing
     tags: preparing
-  
+
   - name: Include Tasks to deploy the Red Hat High Availability cluster
     include_tasks: 02-deploying.yml
+    run_once: true
     args:
       apply:
         tags: deploying
     tags: deploying
-  
+
   - name: Include Tasks to configure stonith devices for the Red Hat High Availability cluster
     include_tasks: 03-stonith.yml
     args:
       apply:
         tags: stonith
     tags: stonith
-  when: ('nodes' in group_names) 
+  when: ('nodes' in group_names)
 
 - name: Include Tasks to configure quorum
   include_tasks: 04-quorum.yml
@@ -52,7 +53,7 @@
     apply:
       tags: create-os-lvm-fs
   tags: create-os-lvm-fs
-  when: ('nodes' in group_names) 
+  when: ('nodes' in group_names)
 
 - name: Include Tasks to configure IPaddr2 resources
   include_tasks: 07-create_pcs_resources_ips.yml
@@ -62,7 +63,7 @@
   tags: create-pcs-resources-ips
   loop: "{{ ipaddr2_list }}"
   run_once: true
-  when: ('nodes' in group_names) 
+  when: ('nodes' in group_names)
 
 - name: Include Tasks to configure LVM resources
   include_tasks: 08-create_pcs_resources_lvm.yml
@@ -82,5 +83,5 @@
   tags: create-pcs-resources-fs
   loop: "{{ ha_lvm_fs_list|subelements('ha_fs') }}"
   run_once: true
-  when: ('nodes' in group_names)  
-...  
+  when: ('nodes' in group_names)
+...
