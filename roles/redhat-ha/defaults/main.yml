@@ -7,16 +7,17 @@
 #redhat_subscription_pool_id: "{{ vault_redhat_subscription_pool_id }}"
 
 ha_cluster_rhsm_repos:
-  - rhel-8-for-x86_64-highavailability-rpms
+  - "rhel-{{ ansible_distribution_major_version }}-for-x86_64-highavailability-rpms"
 
-ha_cluster_packages:    
+
+ha_cluster_packages:
   - pcs
   # - fence-agents-ipmilan
   - fence-agents-all
 
 
 ha_cluster_fw_ports:
-   - high-availability    
+   - high-availability
 
 ha_cluster_name: cluster-test1
 ha_cluster_password: redhat00
@@ -43,17 +44,17 @@ stonith_kvm_key_file_path: "/etc/cluster/fence_xvm.key"
 # Quorum
 ha_quorum_cluster_packages:
   - pcs
-  - corosync-qnetd        
+  - corosync-qnetd
 ha_quorum_dev_system_packages:
   - corosync-qdevice
-ha_quorum_device_net_algorithm: ffsplit    
+ha_quorum_device_net_algorithm: ffsplit
 
 ## Resources
 ha_floating_ip_wait: 60
 
-ha_resource_monitor_interval: 120 
-ha_resource_monitor_timeout: 120 
-ha_resource_start_timeout: 120 
+ha_resource_monitor_interval: 120
+ha_resource_monitor_timeout: 120
+ha_resource_start_timeout: 120
 ha_resource_stop_timeout: 120
 
 auto_activation_local_volume_group_list:
@@ -62,13 +63,13 @@ auto_activation_local_volume_group_list:
 - vg02
 - vg03
 - vg04
-- vglocal  
+- vglocal
 
 reboot_pre_delay: 10
 reboot_post_delay: 65
 reboot_timeout: 1800
 reboot_test_command: uptime
-  
+
 # https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/configuring_and_managing_high_availability_clusters/assembly_controlling-cluster-behavior-configuring-and-managing-high-availability-clusters
 pcs_property_list:
   - { pcs_property: symmetric-cluster, pcs_property_value: true }
